@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"restapi/internal/api/middlewares"
 	"strings"
+	"time"
+
+	mw "restapi/internal/api/middlewares"
 )
 
 type user struct {
@@ -42,31 +44,60 @@ func teachersHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("Sortby: %v, Sort order: %v, Key: %v", sortby, key, sortorder)
 
 		w.Write([]byte("Hello MethodGet on Teachers Route"))
-		// fmt.Println("Hello Get MethodGet on Teachers Route")
 	case http.MethodPost:
 		w.Write([]byte("Hello MethodPost  on Teachers Route"))
-		fmt.Println("Hello Get MethodPost on Teachers Route")
 	case http.MethodPut:
 		w.Write([]byte("Hello MethodPut on Teachers Route"))
-		fmt.Println("Hello Get MethodPut on Teachers Route")
 	case http.MethodPatch:
 		w.Write([]byte("Hello MethodPatch on Teachers Route"))
-		fmt.Println("Hello Get MethodPatch on Teachers Route")
 	case http.MethodDelete:
 		w.Write([]byte("Hello MethodDelete on Teachers Route"))
-		fmt.Println("Hello Get MethodDelete on Teachers Route")
 	}
 }
 
 func studentsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello Students Route"))
-	fmt.Printf("Hello Students Route")
+	switch r.Method {
+	case http.MethodGet:
+		w.Write([]byte("Hello MethodGet on Students Route"))
+	case http.MethodPost:
+		w.Write([]byte("Hello MethodPost  on Students Route"))
+	case http.MethodPut:
+		w.Write([]byte("Hello MethodPut on Students Route"))
+	case http.MethodPatch:
+		w.Write([]byte("Hello MethodPatch on Students Route"))
+	case http.MethodDelete:
+		w.Write([]byte("Hello MethodDelete on Students Route"))
+	}
+}
 
+type Form struct {
+	Name []string
 }
 
 func execsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello Execs Route"))
-	fmt.Printf("Hello Execs Route")
+	switch r.Method {
+	case http.MethodGet:
+		w.Write([]byte("Hello MethodGet on Execs Route"))
+	case http.MethodPost:
+		w.Write([]byte("Hello MethodPost  on Execs Route"))
+		fmt.Println("Query:", r.URL.Query())
+		fmt.Println("Query:", r.URL.Query().Get("name"))
+
+		//Parse form data (necessary for x-www-form-urlencoded)
+		err := r.ParseForm()
+		if err != nil {
+			return
+		}
+		fmt.Println("Form from POST Methods:", r.Form)
+	case http.MethodPut:
+		w.Write([]byte("Hello MethodPut on Execs Route"))
+	case http.MethodPatch:
+		w.Write([]byte("Hello MethodPatch on Execs Route"))
+	case http.MethodDelete:
+		w.Write([]byte("Hello MethodDelete on Execs Route"))
+	}
 
 }
 
@@ -90,11 +121,19 @@ func main() {
 		MinVersion: tls.VersionTLS12,
 	}
 
+	hppOptions := mw.HPPOptions{
+		CheckQuery:                  true,
+		CheckBody:                   true,
+		CheckBodyOnlyForContentType: "application/x-www-form-urlencoded",
+		Whitelist:                   []string{"sortBy", "sortOrder", "name", "age", "class"},
+	}
+
+	rl := mw.NewRateLimiter(5, time.Minute)
 	//Create custom server
 	server := &http.Server{
 		Addr: port,
 		// Handler: mux,
-		Handler:   middlewares.Cors(mux),
+		Handler:   mw.Hpp(hppOptions)(rl.Middleware(mw.Compression(mw.ResponseTimeMiddleware(mw.SecurityHeaders(mw.Cors(mux)))))),
 		TLSConfig: tlsConfig,
 	}
 
