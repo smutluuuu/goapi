@@ -28,6 +28,7 @@ func TeachersHandler(w http.ResponseWriter, r *http.Request) {
 		patchTeachersHandler(w, r)
 		w.Write([]byte("Hello MethodPatch on Teachers Route"))
 	case http.MethodDelete:
+		deleteTeacherHandler(w, r)
 		w.Write([]byte("Hello MethodDelete on Teachers Route"))
 	}
 }
@@ -327,4 +328,52 @@ func patchTeachersHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(existingTeacher)
+}
+
+// DELETE /teachers/{id}
+func deleteTeacherHandler(w http.ResponseWriter, r *http.Request) {
+	idStr := strings.TrimPrefix(r.URL.Path, "/teachers/")
+	id, err := strconv.Atoi(idStr)
+	fmt.Println(id)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Invalid Id", http.StatusBadRequest)
+		return
+	}
+	db, err := sqlconnect.ConnectDb()
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Unable to connect to database", http.StatusInternalServerError)
+
+		return
+	}
+	defer db.Close()
+
+	result, err := db.Exec("DELETE FROM teachers WHERE id = ?", id)
+	if err != nil {
+		http.Error(w, "Error deleting teacher", http.StatusInternalServerError)
+		return
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		http.Error(w, "Error retrieving delete result.", http.StatusInternalServerError)
+		return
+	}
+	if rowsAffected == 0 {
+		http.Error(w, "Teacher not found.", http.StatusNotFound)
+		return
+	}
+
+	// Response Body
+	w.Header().Set("Content-Type", "application/json")
+	response := struct {
+		Status string `json:"status"`
+		ID     int    `json:"id"`
+	}{
+		Status: "Teacher successfully deleted",
+		ID:     id,
+	}
+	json.NewEncoder(w).Encode(response)
+
 }
