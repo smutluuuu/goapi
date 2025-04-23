@@ -261,3 +261,68 @@ func DeleteTeachersHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 
 }
+
+func GetStudentsByTeacherId(w http.ResponseWriter, r *http.Request) {
+
+	teacherId := r.PathValue("id")
+
+	var students []models.Student
+
+	students, err := sqlconnect.GetStudentsByTeacherIdFromDb(teacherId, students)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	response := struct {
+		Status string           `json:"status"`
+		Count  int              `json:"count"`
+		Data   []models.Student `json:"data"`
+	}{
+		Status: "success",
+		Count:  len(students),
+		Data:   students,
+	}
+
+	w.Header().Set("Content-Type", "appcalication/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func GetStudentCountByTeacherId(w http.ResponseWriter, r *http.Request) {
+	teacherId := r.PathValue("id")
+	fmt.Println(teacherId)
+	db, err := sqlconnect.ConnectDb()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer db.Close()
+
+	query := `SELECT COUNT(*) from students WHERE class = (SELECT class from teachers WHERE id = ?)`
+	rows, err := db.Query(query, teacherId)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	defer rows.Close()
+	var studentCount int
+	if rows.Next() {
+		err = rows.Scan(&studentCount)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
+
+	response := struct {
+		Status string `json:"status"`
+		Count  int    `json:"count"`
+	}{
+		Status: "success",
+		Count:  studentCount,
+	}
+
+	w.Header().Set("Content-Type", "appcalication/json")
+	json.NewEncoder(w).Encode(response)
+
+}
