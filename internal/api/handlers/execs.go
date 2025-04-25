@@ -8,7 +8,9 @@ import (
 	"net/http"
 	"restapi/internal/models"
 	"restapi/internal/repository/sqlconnect"
+	"restapi/pkg/utils"
 	"strconv"
+	"time"
 )
 
 func GetExecsHandler(w http.ResponseWriter, r *http.Request) {
@@ -203,4 +205,59 @@ func DeleteOneExecHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(response)
 
+}
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	var req models.Exec
+	// Data Validation
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	if req.Username == "" || req.Password == "" {
+		http.Error(w, "Username and password are required", http.StatusBadRequest)
+		return
+	}
+	//Search for user if exists
+	user, err := sqlconnect.GetUserByUsername(req.Username)
+	if err != nil {
+		http.Error(w, "Invalid username or password", http.StatusBadRequest)
+		return
+	}
+	//Check if user is active
+	if user.InactiveStatus {
+		http.Error(w, "Account is inactive", http.StatusForbidden)
+		return
+	}
+	// verify password
+	err = utils.VerifyPassword(req.Password, user.Password)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusForbidden)
+	}
+	// Generate JWT token
+	tokenString, err := utils.SignToken(user.ID, req.Username, user.Role)
+	if err != nil {
+		http.Error(w, "Could not create token", http.StatusInternalServerError)
+		return
+	}
+
+	// Send token as a response or as a cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "Bearer",
+		Value:    tokenString,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		Expires:  time.Now().Add(24 * time.Hour),
+	})
+
+	w.Header().Set("Content-Type", "application/json")
+	response := struct {
+		Token string `json:"token"`
+	}{
+		Token: tokenString,
+	}
+	json.NewEncoder(w).Encode(response)
 }
