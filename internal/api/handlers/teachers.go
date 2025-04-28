@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"restapi/internal/models"
 	"restapi/internal/repository/sqlconnect"
+	"restapi/pkg/utils"
 	"strconv"
 )
 
@@ -288,6 +289,12 @@ func GetStudentsByTeacherId(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetStudentCountByTeacherId(w http.ResponseWriter, r *http.Request) {
+
+	_, err := utils.AuthorizeUser(r.Context().Value(utils.ContextKey("role")).(string), "exec")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	teacherId := r.PathValue("id")
 
 	studentCount, err := sqlconnect.GetStudentCountByTeacherIdFromDb(teacherId)
