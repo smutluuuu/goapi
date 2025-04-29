@@ -43,7 +43,7 @@ func (rl *rateLimiter) Middleware(next http.Handler) http.Handler {
 		rl.mu.Lock()
 		defer rl.mu.Unlock()
 
-		visitorIP := r.RemoteAddr //You migt want to extract the IP is a more sophisticated way
+		visitorIP := r.RemoteAddr
 		rl.visitors[visitorIP]++
 		fmt.Printf("Visitor count from %v is %v\n", visitorIP, rl.visitors[visitorIP])
 		if rl.visitors[visitorIP] > rl.limit {

@@ -20,7 +20,6 @@ func ResponseTimeMiddleware(next http.Handler) http.Handler {
 		duration := time.Since(start)
 		w.Header().Set("X-Response-Time", duration.String())
 		next.ServeHTTP(wrapperWriter, r)
-		// Calculate the duration
 
 		// Log the request details
 		duration = time.Since(start)

@@ -13,8 +13,4 @@ func MainRouter() *http.ServeMux {
 	sRouter.Handle("/", eRouter)
 	tRouter.Handle("/", sRouter)
 	return tRouter
-
-	// mux := http.NewServeMux()
-	// mux.HandleFunc("GET /", handlers.RootHandler)
-	// return mux
 }
