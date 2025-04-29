@@ -121,8 +121,33 @@ This is a RESTful API for a School Management System, built using Go. It provide
 
 [Provide examples of how to interact with your API using `curl` or other HTTP clients. Focus on key functionalities like creating a user, logging in, and accessing protected resources (if applicable).]
 
+**Example (Create a new executive):**
+
+To create a new executive, send a `POST` request to the `/execs` endpoint. Make sure to include the `Origin` header with the value `https://my-origin-url.com` and the following JSON data in the request body:
+
+````json
+{
+    "first_name": "Alice",
+    "last_name": "Smith",
+    "email": "alice.smith1@example.com",
+    "username": "alice.smiths",
+    "password": "securepassword",
+    "role": "admin"
+}
+
 **Example (Login as an executive):**
 
 ```bash
-curl -X POST -H "Content-Type: application/json" -d '{"username": "your_username", "password": "your_password"}' http://localhost:3000/execs/login
-```
+curl -X POST \
+     -H "Content-Type: application/json" \
+     -H "Origin: [https://my-origin-url.com](https://my-origin-url.com)" \
+     -d '{
+         "first_name": "Alice",
+         "last_name": "Smith",
+         "email": "alice.smith1@example.com",
+         "username": "alice.smiths",
+         "password": "securepassword",
+         "role": "admin"
+       }' \
+     http://localhost:3000/execs
+````
