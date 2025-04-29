@@ -63,7 +63,7 @@ This is a RESTful API for a School Management System, built using Go. It provide
 
 ## Running the API
 
-1.  **Navigate to the Project Directory:**
+1.  **Navigate to the API Directory:**
 
     ```bash
     cd goapi/cmd/api
@@ -126,3 +126,25 @@ This is a RESTful API for a School Management System, built using Go. It provide
 ```bash
 curl -X POST -H "Content-Type: application/json" -d '{"username": "your_username", "password": "your_password"}' http://localhost:3000/execs/login
 ```
+
+**Example (Get all students - might require a JWT token in a cookie named "Bearer" after login):**
+
+```bash
+curl -i http://localhost:3000/students
+```
+
+**Example (Get students for a specific teacher):**
+
+```bash
+curl http://localhost:3000/teachers/123/students
+```
+
+## Contributing
+
+[Explain your contribution guidelines here.]
+
+## Contact
+
+[Suleyman Mutlu] - [suleyman.mutlu96@gmail.com]
+[Your GitHub Profile](https://github.com/smutluuuu)
+[Project Repository](https://github.com/smutluuuu/goapi)
