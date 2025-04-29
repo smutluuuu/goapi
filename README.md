@@ -31,7 +31,7 @@ This is a RESTful API for a School Management System, built using Go. It provide
 2.  **Clone the Repository:**
 
     ```bash
-    git clone [https://github.com/smutluuuu/goapi.git](https://github.com/smutluuuu/goapi.git)
+    git clone https://github.com/smutluuuu/goapi.git
     cd goapi
     ```
 
@@ -72,7 +72,7 @@ This is a RESTful API for a School Management System, built using Go. It provide
 2.  **Run the API:**
 
     ```bash
-    go run main.go
+    go run server.go
     ```
 
     This command will start the School Management System API server on the port specified in your `.env` file (default is `:3000`).
