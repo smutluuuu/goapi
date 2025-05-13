@@ -157,7 +157,7 @@ func PatchStudent(updates []map[string]interface{}) error {
 		}
 
 		var studentFromDb models.Student
-		db.QueryRow("SELECT id, first_name, last_name, email, class FROM students WHERE id = ?", id).Scan(&studentFromDb.ID, &studentFromDb.FirstName, &studentFromDb.LastName, &studentFromDb.Email, &studentFromDb.Class)
+		err = db.QueryRow("SELECT id, first_name, last_name, email, class FROM students WHERE id = ?", id).Scan(&studentFromDb.ID, &studentFromDb.FirstName, &studentFromDb.LastName, &studentFromDb.Email, &studentFromDb.Class)
 		if err != nil {
 			log.Println("ID:", id)
 			log.Printf("Type: %T", id)
