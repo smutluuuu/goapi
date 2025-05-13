@@ -132,7 +132,7 @@ func PatchExecs(updates []map[string]interface{}) error {
 		}
 
 		var execFromDb models.Exec
-		db.QueryRow("SELECT id, first_name, last_name, email, username FROM execs WHERE id = ?", id).Scan(&execFromDb.ID, &execFromDb.FirstName, &execFromDb.LastName, &execFromDb.Email, &execFromDb.Username)
+		err = db.QueryRow("SELECT id, first_name, last_name, email, username FROM execs WHERE id = ?", id).Scan(&execFromDb.ID, &execFromDb.FirstName, &execFromDb.LastName, &execFromDb.Email, &execFromDb.Username)
 		if err != nil {
 			tx.Rollback()
 			if err == sql.ErrNoRows {
